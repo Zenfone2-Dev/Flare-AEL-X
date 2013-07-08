@@ -72,6 +72,8 @@ static int lz4_uncompress(const char *source, char *dest, int osize)
 			len = *ip++;
 			for (; len == 255; length += 255)
 				len = *ip++;
+			if (unlikely(length > (size_t)(length + len)))
+				goto _output_error;
 			length += len;
 		}
 
@@ -106,6 +108,8 @@ static int lz4_uncompress(const char *source, char *dest, int osize)
 		if (length == ML_MASK) {
 			for (; *ip == 255; length += 255)
 				ip++;
+			if (unlikely(length > (size_t)(length + *ip)))
+				goto _output_error;
 			length += *ip++;
 		}
 
@@ -155,7 +159,7 @@ static int lz4_uncompress(const char *source, char *dest, int osize)
 
 	/* write overflow error detected */
 _output_error:
-	return (int) (-(((char *)ip) - source));
+	return -1;
 }
 
 static int lz4_uncompress_unknownoutputsize(const char *source, char *dest,
@@ -283,13 +287,8 @@ _output_error:
 	return (int) (-(((char *) ip) - source));
 }
 
-<<<<<<< HEAD
 int lz4_decompress(const unsigned char *src, size_t *src_len,
 		unsigned char *dest, size_t actual_dest_len)
-=======
-int lz4_decompress(const char *src, size_t *src_len, char *dest,
-		size_t actual_dest_len)
->>>>>>> 7946c5d... decompressor: add LZ4 decompressor module
 {
 	int ret = -1;
 	int input_len = 0;
@@ -304,16 +303,11 @@ exit_0:
 	return ret;
 }
 #ifndef STATIC
-EXPORT_SYMBOL_GPL(lz4_decompress);
+EXPORT_SYMBOL(lz4_decompress);
 #endif
 
-<<<<<<< HEAD
 int lz4_decompress_unknownoutputsize(const unsigned char *src, size_t src_len,
 		unsigned char *dest, size_t *dest_len)
-=======
-int lz4_decompress_unknownoutputsize(const char *src, size_t src_len,
-		char *dest, size_t *dest_len)
->>>>>>> 7946c5d... decompressor: add LZ4 decompressor module
 {
 	int ret = -1;
 	int out_len = 0;
@@ -329,8 +323,8 @@ exit_0:
 	return ret;
 }
 #ifndef STATIC
-EXPORT_SYMBOL_GPL(lz4_decompress_unknownoutputsize);
+EXPORT_SYMBOL(lz4_decompress_unknownoutputsize);
 
-MODULE_LICENSE("GPL");
+MODULE_LICENSE("Dual BSD/GPL");
 MODULE_DESCRIPTION("LZ4 Decompressor");
 #endif
