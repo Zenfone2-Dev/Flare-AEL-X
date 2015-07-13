@@ -800,6 +800,7 @@ _AllocOSPage(IMG_UINT32 ui32CPUCacheFlags,
 				sCPUPhysAddrStart.uiAddr = page_to_phys(psPage);
 				sCPUPhysAddrEnd.uiAddr = sCPUPhysAddrStart.uiAddr + PAGE_SIZE;
 
+<<<<<<< HEAD
 				/* If we're zeroing, we need to make sure the cleared memory is pushed out
 					of the cache before the cache lines are invalidated */
 				if (bFlush)
@@ -820,20 +821,74 @@ _AllocOSPage(IMG_UINT32 ui32CPUCacheFlags,
 			kunmap(psPage);
 		}
 		else
+=======
+#if defined(PHYSMEM_USING_HIGH_ALLOC_ORDER)
+static PVRSRV_ERROR
+_AllocOSHigherOrderPages(struct _PMR_OSPAGEARRAY_DATA_ *psPageArrayData,
+						 IMG_UINT32 ui32CPUCacheFlags,
+						 unsigned int gfp_flags)
+{
+	PVRSRV_ERROR eError;
+	IMG_UINT32 uiOrder;
+	IMG_UINT32 uiPageIndex;	
+	IMG_UINT32 uiMsbNumPages;
+	IMG_BOOL bPageFromPool = IMG_FALSE;
+	IMG_INT32 aiOrderCount[ALLOC_ORDER_ARRAY_SIZE];	
+	struct page **ppsPageArray = psPageArrayData->pagearray;
+	unsigned int gfp_flags_zero_order;
+	unsigned int gfp_flags_other_order;
+#if defined(CONFIG_X86)
+	/* On x86 we batch applying cache attributes by storing references
+	   to all pages that are not from the page pool */
+	struct page *apsUnsetPages[PMR_UNSET_PAGES_STACK_ALLOC];
+	struct page **ppsUnsetPages = apsUnsetPages;
+	IMG_UINT32 uiUnsetPagesIndex = 0;
+	
+	if (psPageArrayData->uiNumPages > PMR_UNSET_PAGES_STACK_ALLOC)
+	{
+		ppsUnsetPages = OSAllocMem(sizeof(struct page*) * psPageArrayData->uiNumPages);
+		if (ppsUnsetPages == NULL)
+>>>>>>> 52fa493... Memory optimization for RGX graphics driver
 		{
 			PVR_DPF((PVR_DBG_ERROR, "physmem_osmem_linux.c: OS refused the memory allocation for the pages.  Did you ask for too much?"));
 			eError = PVRSRV_ERROR_PMR_FAILED_TO_ALLOC_PAGES;
 		}
 #endif
+<<<<<<< HEAD
+=======
+
+	gfp_flags_zero_order = gfp_flags;
+	/* Disable retry/wait  */
+	gfp_flags_other_order = (gfp_flags | __GFP_NORETRY) & ~__GFP_WAIT;
+
+
+	/* Re-express uiNumPages in multi-order up to cut-off order */
+	for (uiOrder = 0; uiOrder <= g_uiCutOffOrder; ++uiOrder)
+	{
+		aiOrderCount[uiOrder] = psPageArrayData->uiNumPages & (1<<uiOrder) ? 1 : 0;
+>>>>>>> 52fa493... Memory optimization for RGX graphics driver
 	}
 #if 0
 	else
 	{
+<<<<<<< HEAD
 		/*
 			The kernel will zero the page for us when we allocate it, but if it
 			comes from the pool then we must do this ourselves.
 		*/
 		if (psPage != IMG_NULL  &&  gfp_flags & __GFP_ZERO)
+=======
+		/* Has this order bucket been exhausted */
+		for  ( ; ! aiOrderCount[uiOrder]; --uiOrder)
+			;
+
+		/* Alloc uiOrder pages at uiPageIndex */
+		eError = _AllocOSPage(ui32CPUCacheFlags,
+							uiOrder ? gfp_flags_other_order : gfp_flags_zero_order,
+							uiOrder,
+							  &ppsPageArray[uiPageIndex], &bPageFromPool);
+		if (eError == PVRSRV_OK)
+>>>>>>> 52fa493... Memory optimization for RGX graphics driver
 		{
 			pvPageVAddr = kmap(psPage);
 			memset(pvPageVAddr, 0, PAGE_SIZE);
