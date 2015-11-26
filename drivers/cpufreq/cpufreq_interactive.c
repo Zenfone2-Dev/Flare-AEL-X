@@ -819,8 +819,13 @@ static ssize_t show_target_loads(
 	for (i = 0; i < tunables->ntarget_loads; i++)
 		ret += sprintf(buf + ret, "%u%s", tunables->target_loads[i],
 			       i & 0x1 ? ":" : " ");
+<<<<<<< HEAD
 
 	sprintf(buf + ret - 1, "\n");
+=======
+	if (ret) ret--;
+	ret += sprintf(buf + ret, "\n");
+>>>>>>> 5b32144... wip warnings
 	spin_unlock_irqrestore(&tunables->target_loads_lock, flags);
 	return ret;
 }
@@ -860,7 +865,12 @@ static ssize_t show_above_hispeed_delay(
 			       tunables->above_hispeed_delay[i],
 			       i & 0x1 ? ":" : " ");
 
+<<<<<<< HEAD
 	sprintf(buf + ret - 1, "\n");
+=======
+	if (ret) ret--;
+	ret += sprintf(buf + ret, "\n");
+>>>>>>> 5b32144... wip warnings
 	spin_unlock_irqrestore(&tunables->above_hispeed_delay_lock, flags);
 	return ret;
 }
