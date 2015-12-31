@@ -40,10 +40,21 @@
 #include <linux/swap.h>
 #include <linux/rcupdate.h>
 #include <linux/notifier.h>
+<<<<<<< HEAD
 #include <linux/delay.h>
 #include <linux/swap.h>
 #include <linux/fs.h>
 #include <linux/cpuset.h>
+=======
+<<<<<<< HEAD
+=======
+#include <linux/mutex.h>
+#include <linux/delay.h>
+
+#define CREATE_TRACE_POINTS
+#include "trace/lowmemorykiller.h"
+>>>>>>> e56ef89... lowmemorykiller: update to Simple Stream's version
+>>>>>>> 647f9a3... lowmemorykiller: update to Simple Stream's version
 
 static uint32_t lowmem_debug_level = 1;
 static short lowmem_adj[6] = {
@@ -69,8 +80,37 @@ static unsigned long lowmem_deathpending_timeout;
 			pr_info(x);			\
 	} while (0)
 
+<<<<<<< HEAD
 static int is4gDram = 0;
 extern int Read_TOTAL_DRAM(void);
+=======
+static bool protected(char *comm)
+{
+ 	if (strcmp(comm, "ndroid.systemui") == 0 || strcmp(comm, "system:ui") == 0) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+static int test_task_flag(struct task_struct *p, int flag)
+{
+	struct task_struct *t = p;
+
+	do {
+		task_lock(t);
+		if (test_tsk_thread_flag(t, flag)) {
+			task_unlock(t);
+			return 1;
+		}
+		task_unlock(t);
+	} while_each_thread(p, t);
+
+	return 0;
+}
+
+static DEFINE_MUTEX(scan_mutex);
+>>>>>>> e56ef89... lowmemorykiller: update to Simple Stream's version
 
 //ASUS
 #define DTaskMax 4
@@ -117,6 +157,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 {
 	struct task_struct *tsk;
 	struct task_struct *selected = NULL;
+	struct sysinfo swap_info;
 	int rem = 0;
 	int tasksize;
 	int i;
@@ -125,6 +166,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	int selected_tasksize = 0;
 	short selected_oom_score_adj;
 	int array_size = ARRAY_SIZE(lowmem_adj);
+<<<<<<< HEAD
 	int other_free = global_page_state(NR_FREE_PAGES) - totalreserve_pages;
 	int other_file = global_page_state(NR_FILE_PAGES) -
 						global_page_state(NR_SHMEM);
@@ -140,6 +182,39 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	int dma32_free = 0, dma32_file = 0;
 	struct zone *zone;
 	// BZ7024<<
+=======
+	int other_free;
+	int other_file;
+	unsigned long nr_to_scan = sc->nr_to_scan;
+	si_swapinfo(&swap_info);
+
+	rcu_read_lock();
+	tsk = current->group_leader;
+	if ((tsk->flags & PF_EXITING) && test_task_flag(tsk, TIF_MEMDIE)) {
+		set_tsk_thread_flag(current, TIF_MEMDIE);
+		rcu_read_unlock();
+		return 0;
+	}
+	rcu_read_unlock();
+
+	if (nr_to_scan > 0) {
+		if (mutex_lock_interruptible(&scan_mutex) < 0)
+			return 0;
+	}
+
+	other_free = global_page_state(NR_FREE_PAGES) -
+			 global_page_state(NR_FREE_CMA_PAGES)
+			 + swap_info.freeswap;
+
+	other_file = global_page_state(NR_FILE_PAGES)
+			- global_page_state(NR_SHMEM)
+			- global_page_state(NR_FILE_MAPPED)
+			- total_swapcache_pages();
+
+	if (other_file < 0)
+		other_file = 0;
+
+>>>>>>> e56ef89... lowmemorykiller: update to Simple Stream's version
 	if (lowmem_adj_size < array_size)
 		array_size = lowmem_adj_size;
 	if (lowmem_minfree_size < array_size)
@@ -151,51 +226,21 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 			break;
 		}
 	}
-	if (sc->nr_to_scan > 0)
+	if (nr_to_scan > 0)
 		lowmem_print(3, "lowmem_shrink %lu, %x, ofree %d %d, ma %hd\n",
-				sc->nr_to_scan, sc->gfp_mask, other_free,
+				nr_to_scan, sc->gfp_mask, other_free,
 				other_file, min_score_adj);
-	//BZ7024>>
-	if(is4gDram == 1) {
-		if (min_score_adj == OOM_SCORE_ADJ_MAX + 1) {
-			/*
-			 * Shrink callback is called but global memory is ok. Maybe
-			 * DMA32 zone memory is in short.
-			 */
-			for_each_populated_zone(zone) {
-				if (is_dma32(zone)) {
-					dma32_free = zone_page_state(zone, NR_FREE_PAGES);
-					dma32_file = zone_page_state(zone, NR_FILE_PAGES)
-						- zone_page_state(zone, NR_SHMEM);
-				}
-			}
-
-			for (i = 0; i < 1; i++) {
-				// 6*1024 will cause some fail case
-				// EX : TT 634316
-				minfree = lowmem_minfree[i];
-
-				if (dma32_free && dma32_free < minfree
-						&& dma32_file < minfree) {
-					min_score_adj = lowmem_adj[i];
-					lowmem_print(1, "dma32 is in short: free:%d, file:%d, min_score_adj:%hu\n",
-						dma32_free, dma32_file, min_score_adj);
-					break;
-				}
-			}
-
-			lowmem_print(3, "dma32: free:%d, file:%d, min_score_adj:%hu\n",
-					dma32_free, dma32_file, min_score_adj);
-		}
-	}
-	//BZ7024<<
 	rem = global_page_state(NR_ACTIVE_ANON) +
 		global_page_state(NR_ACTIVE_FILE) +
 		global_page_state(NR_INACTIVE_ANON) +
 		global_page_state(NR_INACTIVE_FILE);
-	if (sc->nr_to_scan <= 0 || min_score_adj == OOM_SCORE_ADJ_MAX + 1) {
+	if (nr_to_scan <= 0 || min_score_adj == OOM_SCORE_ADJ_MAX + 1) {
 		lowmem_print(5, "lowmem_shrink %lu, %x, return %d\n",
-			     sc->nr_to_scan, sc->gfp_mask, rem);
+			     nr_to_scan, sc->gfp_mask, rem);
+
+		if (nr_to_scan > 0)
+			mutex_unlock(&scan_mutex);
+
 		return rem;
 	}
 	selected_oom_score_adj = min_score_adj;
@@ -213,22 +258,36 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 		if (tsk->flags & PF_KTHREAD)
 			continue;
 
-		p = find_lock_task_mm(tsk);
-		if (!p)
+		/* if task no longer has any memory ignore it */
+		if (test_task_flag(tsk, TIF_MM_RELEASED))
 			continue;
 
+<<<<<<< HEAD
 		if (test_tsk_thread_flag(p, TIF_MEMDIE)) {
 			if (time_before_eq(jiffies,
 				lowmem_deathpending_timeout)) {
 				list_reset(&ListHead);	//ASUS
 				task_unlock(p);
+=======
+		if (time_before_eq(jiffies, lowmem_deathpending_timeout)) {
+			if (test_task_flag(tsk, TIF_MEMDIE)) {
+>>>>>>> e56ef89... lowmemorykiller: update to Simple Stream's version
 				rcu_read_unlock();
+				/* give the system time to free up the memory */
+				if (!same_thread_group(current, tsk))
+					msleep_interruptible(20);
+				else
+					set_tsk_thread_flag(current,
+								TIF_MEMDIE);
+				mutex_unlock(&scan_mutex);
 				return 0;
-			} else {
-				task_unlock(p);
-				continue;
 			}
 		}
+
+		p = find_lock_task_mm(tsk);
+		if (!p)
+			continue;
+
 		oom_score_adj = p->signal->oom_score_adj;
 		
 		//ASUS
@@ -242,6 +301,29 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 			task_unlock(p);
 			continue;
 		}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+		if (fatal_signal_pending(p) ||
+				((p->flags & PF_EXITING) &&
+					test_tsk_thread_flag(p, TIF_MEMDIE))) {
+			lowmem_print(2, "skip slow dying process %d\n", p->pid);
+			task_unlock(p);
+			continue;
+		}
+		if (protected(p->comm)) {
+			task_unlock(p);
+			continue;
+		}
+		/* this bypasses all low memory calculations. */
+		if (swap_info.freeswap > total_swap_pages/10) {
+			task_unlock(p);
+			continue;
+		}
+>>>>>>> e56ef89... lowmemorykiller: update to Simple Stream's version
+		tasksize = get_mm_rss(p->mm);
+>>>>>>> 647f9a3... lowmemorykiller: update to Simple Stream's version
 		task_unlock(p);
 		if (tasksize <= 0)
 			continue;
@@ -331,6 +413,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 			     p->comm, p->pid, oom_score_adj, tasksize);
 		*/
 	}
+<<<<<<< HEAD
 	list_for_each_entry_safe_reverse(pTaskIterator, pTaskNext, &ListHead, node)	//ASUS
 	{
 		selected = pTaskIterator->pTask;
@@ -357,6 +440,16 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 		}
 		//ASUS
 		
+=======
+	if (selected) {
+<<<<<<< HEAD
+=======
+		long cache_size = other_file * (long)(PAGE_SIZE / 1024);
+		long cache_limit = minfree * (long)(PAGE_SIZE / 1024);
+		long free = other_free * (long)(PAGE_SIZE / 1024);
+		trace_lowmemory_kill(selected, cache_size, cache_limit, free);
+>>>>>>> e56ef89... lowmemorykiller: update to Simple Stream's version
+>>>>>>> 647f9a3... lowmemorykiller: update to Simple Stream's version
 		lowmem_print(1, "Killing '%s' (%d), adj %hd,\n" \
 				"   to free %ldkB on behalf of '%s' (%d) because\n" \
 				"   cache %ldkB is below limit %ldkB for oom_score_adj %hd\n" \
@@ -365,22 +458,34 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 			     selected_oom_score_adj,
 			     selected_tasksize * (long)(PAGE_SIZE / 1024),
 			     current->comm, current->pid,
-			     other_file * (long)(PAGE_SIZE / 1024),
-			     minfree * (long)(PAGE_SIZE / 1024),
+			     cache_size, cache_limit,
 			     min_score_adj,
-			     other_free * (long)(PAGE_SIZE / 1024));
+			     free);
 		lowmem_deathpending_timeout = jiffies + HZ;
 		send_sig(SIGKILL, selected, 0);
 		set_tsk_thread_flag(selected, TIF_MEMDIE);
 		rem -= selected_tasksize;
+<<<<<<< HEAD
 		
 		/* [ASUS] give the system time to free up the memory */
 		msleep_interruptible(20);
 	}
 	list_reset(&ListHead);	//ASUS
+=======
+<<<<<<< HEAD
+	}
+=======
+		rcu_read_unlock();
+		/* give the system time to free up the memory */
+		msleep_interruptible(20);
+	} else
+		rcu_read_unlock();
+
+>>>>>>> e56ef89... lowmemorykiller: update to Simple Stream's version
+>>>>>>> 647f9a3... lowmemorykiller: update to Simple Stream's version
 	lowmem_print(4, "lowmem_shrink %lu, %x, return %d\n",
-		     sc->nr_to_scan, sc->gfp_mask, rem);
-	rcu_read_unlock();
+		     nr_to_scan, sc->gfp_mask, rem);
+	mutex_unlock(&scan_mutex);
 	return rem;
 }
 
@@ -391,8 +496,6 @@ static struct shrinker lowmem_shrinker = {
 
 static int __init lowmem_init(void)
 {
-	is4gDram = Read_TOTAL_DRAM()>3000?1:0;
-	pr_info("DRAM total size = %dM, Is 4G device = %d\n", Read_TOTAL_DRAM(), is4gDram);
 	register_shrinker(&lowmem_shrinker);
 	return 0;
 }
@@ -498,4 +601,5 @@ module_init(lowmem_init);
 module_exit(lowmem_exit);
 
 MODULE_LICENSE("GPL");
+
 
