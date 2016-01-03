@@ -1981,6 +1981,8 @@ static void arizona_enable_fll(struct arizona_fll *fll)
 	regmap_update_bits(arizona->regmap, fll->base + 1,
 			   ARIZONA_FLL1_FREERUN, 0);
 	regmap_update_bits(arizona->regmap, fll->base + 1,
+			   ARIZONA_FLL1_FREERUN, 0);
+	regmap_update_bits(arizona->regmap, fll->base + 1,
 			   ARIZONA_FLL1_ENA, ARIZONA_FLL1_ENA);
 	if (use_sync)
 		regmap_update_bits(arizona->regmap, fll->base + 0x11,
