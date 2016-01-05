@@ -1033,6 +1033,7 @@ static void dwc3_prepare_trbs(struct dwc3_ep *dep, bool starting)
 					 * This is critical to get an interrupt
 					 * after the sg list is sent.
 					 */
+				if (list_empty(&dep->request_list))
 					last_one = true;
 					chain = false;
 				}
