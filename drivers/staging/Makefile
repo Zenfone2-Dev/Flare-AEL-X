@@ -65,3 +65,4 @@ obj-$(CONFIG_INTEL_NORTHPEAK)   += npk/
 obj-$(CONFIG_SVENTX)            += sventx/
 obj-$(CONFIG_SNAPPY_COMPRESS)	+= snappy/
 obj-$(CONFIG_SNAPPY_DECOMPRESS)	+= snappy/
+obj-$(CONFIG_VNSWAP)		+= vnswap/
