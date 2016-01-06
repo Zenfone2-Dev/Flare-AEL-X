@@ -519,21 +519,6 @@ done:
 }
 
 /*-------------------------------------------------------------------------*/
-#define PCI_DEVICE_ID_INTEL_QUARK_X1000_SOC		0x0939
-static inline bool is_intel_quark_x1000(struct pci_dev *pdev)
-{
-	return pdev->vendor == PCI_VENDOR_ID_INTEL &&
-		pdev->device == PCI_DEVICE_ID_INTEL_QUARK_X1000_SOC;
-}
-
-/*
- * 0x84 is the offset of in/out threshold register,
- * and it is the same offset as the register of 'hostpc'.
- */
-#define	intel_quark_x1000_insnreg01	hostpc
-
-/* Maximum usable threshold value is 0x7f dwords for both IN and OUT */
-#define INTEL_QUARK_X1000_EHCI_MAX_THRESHOLD	0x007f007f
 
 #ifdef	CONFIG_PM
 
