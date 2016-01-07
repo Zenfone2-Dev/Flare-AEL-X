@@ -1332,11 +1332,8 @@ static void __cpuinit build_r4000_tlb_refill_handler(void)
 	}
 #ifdef CONFIG_MIPS_HUGE_TLB_SUPPORT
 	uasm_l_tlb_huge_update(&l, p);
-<<<<<<< HEAD
 	if (htlb_info.need_reload_pte)
 		UASM_i_LW(&p, htlb_info.huge_pte, 0, K1);
-=======
->>>>>>> 97cab18... Revert "linux 3.10.55"
 	build_huge_update_entries(&p, htlb_info.huge_pte, K1);
 	build_huge_tlb_write_entry(&p, &l, &r, K0, tlb_random,
 				   htlb_info.restore_scratch);

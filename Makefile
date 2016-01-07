@@ -1,10 +1,6 @@
 VERSION = 3
 PATCHLEVEL = 10
-<<<<<<< HEAD
 SUBLEVEL = 64
-=======
-SUBLEVEL = 54
->>>>>>> 97cab18... Revert "linux 3.10.55"
 EXTRAVERSION =
 NAME = TOSSUG Baby Fish
 
