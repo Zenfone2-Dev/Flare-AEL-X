@@ -2,6 +2,7 @@
  * drivers/cpufreq/cpufreq_yankactive.c
  *
  * Copyright (C) 2010 Google, Inc.
+ * (C) 2014 LoungeKatt <twistedumbrella@gmail.com>
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -13,8 +14,11 @@
  * GNU General Public License for more details.
  *
  * Author: Mike Chan (mike@android.com)
+ * Tweaked by Yank555-lu
+ * Hotplugging implementation by TheSSJ
  *
  */
+
 #include <linux/cpu.h>
 #include <linux/cpumask.h>
 #include <linux/cpufreq.h>
@@ -31,6 +35,13 @@
 #include <linux/slab.h>
 #include <linux/kernel_stat.h>
 #include <asm/cputime.h>
+
+//easy debug switch
+//#define GOVDEBUG
+
+//for adding early suspend and late resume handlers
+#include <linux/earlysuspend.h>
+#include <linux/wait.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/cpufreq_yankactive.h>
@@ -129,7 +140,43 @@ static struct cpufreq_yankactive_tunables *common_tunables;
 static struct kobject *get_governor_parent_kobj(struct cpufreq_policy *policy);
 static struct attribute_group *get_sysfs_attr(void);
 
-extern whichgov ta_active;
+static void __cpuinit early_suspend_offline_cpus(struct early_suspend *h)
+{
+	#ifdef GOVDEBUG
+	printk("entered early_suspend handler in thessjactive");
+	#else
+	unsigned int cpu;
+	for_each_possible_cpu(cpu)
+	{
+		if (cpu<2) //begin offline work at core 3
+			continue;
+		
+		if (cpu_online(cpu) && num_online_cpus() > 2) //get 2 cores down, cores 3 and 4 
+			cpu_down(cpu);
+	}
+	#endif
+}
+
+static void __cpuinit late_resume_online_cpus(struct early_suspend *h)
+{
+	#ifdef GOVDEBUG
+	printk("entered late_resume handler in thessjactive");
+	#else
+	unsigned int cpu;
+	
+	for_each_possible_cpu(cpu)
+	{
+		if (!cpu_online(cpu) && num_online_cpus() < 4) //get all up 
+			cpu_up(cpu);
+	}
+	#endif
+}
+
+static struct early_suspend hotplug_auxcpus_desc __refdata = {
+	.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN,
+	.suspend = early_suspend_offline_cpus,
+	.resume = late_resume_online_cpus,
+};
 
 static inline cputime64_t get_cpu_idle_time_jiffy(unsigned int cpu,
 						  cputime64_t *wall)
@@ -713,6 +760,7 @@ static void cpufreq_yankactive_touchboost(void)
 	if (anyboost)
 		wake_up_process(speedchange_task);
 }
+
 
 static int cpufreq_yankactive_notifier(
 	struct notifier_block *nb, unsigned long val, void *data)
@@ -1358,6 +1406,7 @@ static int cpufreq_governor_yankactive(struct cpufreq_policy *policy,
 			idle_notifier_register(&cpufreq_yankactive_idle_nb);
 			cpufreq_register_notifier(&cpufreq_notifier_block,
 					CPUFREQ_TRANSITION_NOTIFIER);
+			register_early_suspend(&hotplug_auxcpus_desc);
 		}
 
 		break;
@@ -1368,6 +1417,7 @@ static int cpufreq_governor_yankactive(struct cpufreq_policy *policy,
 				cpufreq_unregister_notifier(&cpufreq_notifier_block,
 						CPUFREQ_TRANSITION_NOTIFIER);
 				idle_notifier_unregister(&cpufreq_yankactive_idle_nb);
+				unregister_early_suspend(&hotplug_auxcpus_desc);
 			}
 
 			sysfs_remove_group(get_governor_parent_kobj(policy),
@@ -1387,7 +1437,7 @@ static int cpufreq_governor_yankactive(struct cpufreq_policy *policy,
 			tunables->hispeed_freq = policy->max;
 
 		if (!tunables->touchboost_freq)
-			tunables->touchboost_freq = policy->max - 500000; //1.83GHz for 2.33GHz models, 1.33GHz for the 1.83GHz models
+			tunables->touchboost_freq = policy->max;
 		for_each_cpu(j, policy->cpus) {
 			pcpu = &per_cpu(cpuinfo, j);
 			pcpu->policy = policy;
@@ -1408,11 +1458,9 @@ static int cpufreq_governor_yankactive(struct cpufreq_policy *policy,
 		}
 
 		mutex_unlock(&gov_lock);
-		ta_active = YANKACTIVE;
 		break;
 
 	case CPUFREQ_GOV_STOP:
-		ta_active = NONE;
 		mutex_lock(&gov_lock);
 		for_each_cpu(j, policy->cpus) {
 			pcpu = &per_cpu(cpuinfo, j);
@@ -1500,7 +1548,7 @@ static int __init cpufreq_yankactive_init(void)
 	unsigned int i;
 	struct cpufreq_yankactive_cpuinfo *pcpu;
 	struct sched_param param = { .sched_priority = MAX_RT_PRIO-1 };
-	//set_tboost = &set_tboost_ya;
+
 	/* Initalize per-cpu timers */
 	for_each_possible_cpu(i) {
 		pcpu = &per_cpu(cpuinfo, i);
@@ -1531,25 +1579,6 @@ static int __init cpufreq_yankactive_init(void)
 	return cpufreq_register_governor(&cpufreq_gov_yankactive);
 }
 
-void set_cpufreq_boost_ya(unsigned int enable)
-{
-		if(ta_active==NONE)
-			return;
-		struct cpufreq_yankactive_cpuinfo *pcpu = &per_cpu(cpuinfo, raw_smp_processor_id());
-        struct cpufreq_yankactive_tunables *tunables = pcpu->policy->governor_data;
-        
-         if (enable && (ktime_to_us(ktime_get()) > tunables->touchboostpulse_endtime)) {
-			tunables->touchboostpulse_endtime = ktime_to_us(ktime_get()) + tunables->touchboostpulse_duration_val;
-			trace_cpufreq_yankactive_boost("pulse");
-            cpufreq_yankactive_touchboost();
-			} 
-        else {
-                trace_cpufreq_yankactive_unboost("off");
-			}
-	return;
-}
-EXPORT_SYMBOL_GPL(set_cpufreq_boost_ya);
-
 #ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_yankactive
 fs_initcall(cpufreq_yankactive_init);
 #else
@@ -1566,6 +1595,7 @@ static void __exit cpufreq_yankactive_exit(void)
 module_exit(cpufreq_yankactive_exit);
 
 MODULE_AUTHOR("Mike Chan <mike@android.com>");
+MODULE_AUTHOR("Yank555-lu");
 MODULE_DESCRIPTION("'cpufreq_yankactive' - A cpufreq governor for "
 	"Latency sensitive workloads");
 MODULE_LICENSE("GPL");
