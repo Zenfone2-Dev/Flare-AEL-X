@@ -382,15 +382,11 @@ KBUILD_CFLAGS   := $(ANDROID_TOOLCHAIN_FLAGS) \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-<<<<<<< HEAD
-		   -fno-delete-null-pointer-checks
-=======
 		   -fno-delete-null-pointer-checks \
 		   -Wno-sizeof-pointer-memaccess \
  		   -std=gnu89 \
 		   $(KERNEL_MODS)
 
->>>>>>> 5a168b9... Linux 3.10.80
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
