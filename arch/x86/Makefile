@@ -31,15 +31,12 @@ ifeq ($(CONFIG_X86_32),y)
 
         KBUILD_CFLAGS += -msoft-float -mregparm=3 -freg-struct-return
 
-<<<<<<< HEAD
-=======
         # Don't autogenerate MMX or SSE instructions
         KBUILD_CFLAGS += -mno-mmx -mno-sse
 
         # Don't autogenerate SSE instructions
 	KBUILD_CFLAGS += -mno-sse
 
->>>>>>> d9e7a64... linux 3.10.24
         # Never want PIC in a 32-bit kernel, prevent breakage with GCC built
         # with nonstandard options
         KBUILD_CFLAGS += -fno-pic
