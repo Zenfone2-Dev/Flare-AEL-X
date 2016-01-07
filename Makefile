@@ -1,12 +1,7 @@
 VERSION = 3
 PATCHLEVEL = 10
-<<<<<<< HEAD
-SUBLEVEL = 20
-EXTRAVERSION = _ProjectT_v88
-=======
 SUBLEVEL = 21
 EXTRAVERSION = _FlareM_v9
->>>>>>> faa0231... linux 3.10.21
 NAME = TOSSUG Baby Fish
 
 # *DOCUMENTATION*
