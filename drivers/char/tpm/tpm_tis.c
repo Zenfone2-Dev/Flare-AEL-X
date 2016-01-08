@@ -428,9 +428,6 @@ static bool tpm_tis_update_timeouts(struct tpm_chip *chip,
 	return false;
 }
 
->>>>>>> f7fda8b... linux 3.10.71
-=======
->>>>>>> 7bb0e3a... final fix (ril)
 /*
  * Early probing for iTPM with STS_DATA_EXPECT flaw.
  * Try sending command without itpm flag set and if that
