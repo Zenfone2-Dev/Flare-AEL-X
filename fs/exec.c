@@ -1268,8 +1268,6 @@ static int check_unsafe_exec(struct linux_binprm *bprm)
 	return res;
 }
 
-<<<<<<< HEAD
-=======
 static void bprm_fill_uid(struct linux_binprm *bprm)
 {
 	struct inode *inode;
@@ -1317,7 +1315,6 @@ static void bprm_fill_uid(struct linux_binprm *bprm)
 	}
 }
 
->>>>>>> 322c424... Linux 3.10.83
 /* 
  * Fill the binprm structure from the inode. 
  * Check permissions, then read the first 128 (BINPRM_BUF_SIZE) bytes
