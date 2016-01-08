@@ -222,12 +222,7 @@ static void s2s_input_event(struct input_handle *handle, unsigned int type,
 	{
 		//Touch up is done here, unboost if still boosted
 		if(touchboost)
-		{
-			if(ta_active==THESSJACTIVE)
-				set_cpufreq_boost_ta(0);
-			if(ta_active==YANKACTIVE)
-				set_cpufreq_boost_ya(0);
-		}
+		
 		//as the finger left the contact with the screen, it doesn't count as sweep anymore, therefore reset
 		sweep2sleep_reset();
 		return;
@@ -251,13 +246,6 @@ static void s2s_input_event(struct input_handle *handle, unsigned int type,
 		touch_y_called = false;
 		
 		//we have x and y coordinates, we can start the touchboost now
-		if(touchboost)
-		{
-			if(ta_active==THESSJACTIVE)
-				set_cpufreq_boost_ta(1);
-			if(ta_active==YANKACTIVE)
-				set_cpufreq_boost_ya(1);
-		}
 		
 		//if sweep2sleep isn't activated, we don't need to evaluate anything. Reset and break out
 		if(!s2s)
