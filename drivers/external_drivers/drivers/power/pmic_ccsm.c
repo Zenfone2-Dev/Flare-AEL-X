@@ -65,7 +65,7 @@
 #include <linux/HWVersion.h>
 #include "pmic_ccsm.h"
 #if defined(CONFIG_A500CG_BATTERY_SMB347) || defined(CONFIG_SMB1357_CHARGER)
-#include "../../../kernel/drivers/power/ASUS_BATTERY/smb_external_include.h"
+#include "../../../drivers/power/ASUS_BATTERY/smb_external_include.h"
 #define SRCWAKECFG_ADDR       0x23
 extern int dcp_mode;
 extern int invalid_charger;

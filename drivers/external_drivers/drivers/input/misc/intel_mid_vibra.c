@@ -39,7 +39,7 @@
 #include <asm/intel_scu_pmic.h>
 #include <linux/hrtimer.h>
 #include <linux/wakelock.h>
-#include <../../../../kernel/drivers/staging/android/timed_output.h>
+#include <../../../../../drivers/staging/android/timed_output.h>
 #include "mid_vibra.h"
 
 extern bool is_incall;
