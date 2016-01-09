@@ -444,7 +444,7 @@ static int otm1901a_vid_set_brightness(struct mdfld_dsi_config *dsi_config,
 	rt4532_brightness_set(level);
 #endif
 
-	reg_level = ~level & 0xFF;
+	pwmctrl.part.pwmswupdate = 0x1;
 	pwmctrl.part.pwmbu = PWM_BASE_UNIT;
 	pwmctrl.part.pwmtd = reg_level;
 
@@ -472,8 +472,7 @@ static int otm1901a_vid_set_brightness(struct mdfld_dsi_config *dsi_config,
 		DRM_ERROR("Cannot map pwmctrl\n");
 	}
 
-	if (level == 0)
-		printk("[DISP OTM] brightness level = %d\n", level);
+	printk("[DISP] brightness level = %d\n", level);
 
 	return 0;
 }
