@@ -17,13 +17,10 @@ export VER=v$1
 echo "Setting Extra Version"
 export EV=EXTRAVERSION=_FlareM_v$1
 echo "Setting Defconfig"
-<<<<<<< HEAD
 export DEFCONFIG=x86_64_moor_defconfig
-echo "Setting bzImage Location For FlareS kernel By friedrich420 Of XDA (thanks to eoghan2t7)"
-=======
+echo "Setting bzImage Location For Ael Zen kernel By friedrich420 Of XDA (thanks to eoghan2t7)"
 export DEFCONFIG=cyanogenmod_zenfone2_defconfig
 echo "Setting bzImage Location For FlareM kernel By say99 Of XDA (thanks to eoghan2t7)"
->>>>>>> 67711fb9ba7ad01fca428b8730a2d1af610c7501
 export BZIMAGE=arch/x86/boot/bzImage
 echo "Enabling Graphite Optimizations"
 export ENABLE_GRAPHITE=true
@@ -48,11 +45,8 @@ else
    make $DEFCONFIG
    sleep 1
 fi
-<<<<<<< HEAD
 wmctrl -r :ACTIVE: -N "Compiling AEL Kernel"
-=======
 wmctrl -r :ACTIVE: -N "Compiling FlareM Kernel"
->>>>>>> 67711fb9ba7ad01fca428b8730a2d1af610c7501
 make $EV -j$CPUS
 
 if [ -f $BZIMAGE ];
@@ -78,11 +72,8 @@ echo "Starting Build Process  : done"
 echo "Build complete"
 
 #Kernel Packing
-<<<<<<< HEAD
 wmctrl -r :ACTIVE: -N "AEL Kernel Packing"
-=======
 wmctrl -r :ACTIVE: -N "FlareM Kernel Packing"
->>>>>>> 67711fb9ba7ad01fca428b8730a2d1af610c7501
 echo "Starting Packing To Recovery Flashable Zip"
 cd out/
 echo "Removing Old Files"
@@ -91,13 +82,10 @@ sleep 1
 echo "Copying bzImage"
 mv ../arch/x86/boot/bzImage bzImage
 sleep 1
-<<<<<<< HEAD
 echo "Compiling AEL_"$VER".zip"
 find . -type f -exec zip AEL_"$VER".zip {} +
-=======
 echo "Compiling FlareM_"$VER".zip"
 find . -type f -exec zip FlareM_"$VER".zip {} +
->>>>>>> 67711fb9ba7ad01fca428b8730a2d1af610c7501
 nowf=$(date +"%T")
 cd ..
 make clean
