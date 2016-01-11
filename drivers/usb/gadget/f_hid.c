@@ -464,7 +464,12 @@ static int hidg_setup(struct usb_function *f,
 	case ((USB_DIR_IN | USB_TYPE_CLASS | USB_RECIP_INTERFACE) << 8
 		  | HID_REQ_GET_PROTOCOL):
 		VDBG(cdev, "get_protocol\n");
-		goto stall;
+		length = min_t(unsigned, length, 1);
+		if (hidg->bInterfaceSubClass == USB_INTERFACE_SUBCLASS_BOOT)
+			((u8 *) req->buf)[0] = 0;	/* Boot protocol */
+		else
+			((u8 *) req->buf)[0] = 1;	/* Report protocol */
+		goto respond;
 		break;
 
 	case ((USB_DIR_OUT | USB_TYPE_CLASS | USB_RECIP_INTERFACE) << 8
@@ -476,6 +481,14 @@ static int hidg_setup(struct usb_function *f,
 	case ((USB_DIR_OUT | USB_TYPE_CLASS | USB_RECIP_INTERFACE) << 8
 		  | HID_REQ_SET_PROTOCOL):
 		VDBG(cdev, "set_protocol\n");
+		length = 0;
+		if (hidg->bInterfaceSubClass == USB_INTERFACE_SUBCLASS_BOOT) {
+			if (value == 0)		/* Boot protocol */
+				goto respond;
+		} else {
+			if (value == 1)		/* Report protocol */
+				goto respond;
+		}
 		goto stall;
 		break;
 
@@ -625,7 +638,7 @@ const struct file_operations f_hidg_fops = {
 	.llseek		= noop_llseek,
 };
 
-static int __init hidg_bind(struct usb_configuration *c, struct usb_function *f)
+static int hidg_bind(struct usb_configuration *c, struct usb_function *f)
 {
 	struct usb_ep		*ep;
 	struct f_hidg		*hidg = func_to_hidg(f);
@@ -730,12 +743,10 @@ static void hidg_unbind(struct usb_configuration *c, struct usb_function *f)
 
 	/* disable/free request and end point */
 	usb_ep_disable(hidg->in_ep);
-      
 	/* TODO: calling this function crash kernel,
 	   not calling this funct ion crash kernel inside f_hidg_write */
 	/* usb_ep_dequeue(hidg->in_ep, hidg->req); */
 
-	usb_ep_dequeue(hidg->in_ep, hidg->req);
 	kfree(hidg->req->buf);
 	usb_ep_free_request(hidg->in_ep, hidg->req);
 
@@ -768,7 +779,7 @@ static struct usb_gadget_strings *ct_func_strings[] = {
 /*-------------------------------------------------------------------------*/
 /*                             usb_configuration                           */
 
-int __init hidg_bind_config(struct usb_configuration *c,
+int hidg_bind_config(struct usb_configuration *c,
 			    struct hidg_func_descriptor *fdesc, int index)
 {
 	struct f_hidg *hidg;
@@ -822,7 +833,7 @@ int __init hidg_bind_config(struct usb_configuration *c,
 	return status;
 }
 
-int __init ghid_setup(struct usb_gadget *g, int count)
+int ghid_setup(struct usb_gadget *g, int count)
 {
 	int status;
 	dev_t dev;
