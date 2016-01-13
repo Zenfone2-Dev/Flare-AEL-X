@@ -204,7 +204,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/x86/ -e s/x86_64/x86/ \
 # Default value for CROSS_COMPILE is not to prefix executables
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 ARCH		?= $(CARCH)
-CROSS_COMPILE	?= $(CCACHE) /home/friedrich420/kernel/x86_64-linux-gnu-5.2/bin/x86_64-
+CROSS_COMPILE	?= $(CCACHE) /home/friedrich420/kernel/x86_64-linux-linaro4.9/bin/x86_64-linux-
 
 
 # Architecture as present in compile.h
@@ -395,11 +395,6 @@ KBUILD_CFLAGS   := $(ANDROID_TOOLCHAIN_FLAGS) \
 		   -Werror-implicit-function-declaration -Wno-uninitialized \
 		   -Wno-format-security -Wno-array-bounds -Wno-unused-variable -Wno-unused-function \
 		   -Wno-sequence-point \
-		   -Wno-switch \
-		   -Wno-switch-bool \
-		   -Wno-switch-enum \
-		   -Wno-logical-not-parentheses \
-		   -Wno-bool-compare \
 		   -fno-aggressive-loop-optimizations \
 		   -fno-delete-null-pointer-checks -fno-pic -Wno-maybe-uninitialized \
  		   -std=gnu89 \
