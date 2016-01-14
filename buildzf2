@@ -49,6 +49,7 @@ fi
 wmctrl -r :ACTIVE: -N "Compiling FareX Kernel"
 make $EV -j$CPUS
 
+
 if [ -f $BZIMAGE ];
 then
    echo "$BZIMAGE exists"
