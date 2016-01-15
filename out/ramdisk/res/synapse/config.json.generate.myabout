@@ -1,0 +1,28 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:"ABOUT",
+    elements:[
+    	{ SLiveLabel:{
+		description:"\n",
+		refresh:10000000,
+		action:"echo Hello"
+	}},
+	{ SLiveLabel:{
+		refresh:10000000,
+		style:"bold",
+		action:"echo Welcome to Ael Zen Kernel"
+	}},
+    	{ SLiveLabel:{
+		refresh:10000000,
+		action:"echo by"
+	}},
+    	{ SLiveLabel:{
+		refresh:10000000,
+		style:"bold",
+		action:"echo friedrich420"
+	}},
+    ]
+}
+CTAG

@@ -1,0 +1,43 @@
+#!/system/bin/sh
+
+cat << CTAG
+{
+    name:GPU,
+    elements:[
+	{ SLiveLabel:{
+		refresh:1000,
+		action:"live gpu"
+	}},
+	{ SPane:{
+		title:"GPU Governor"
+	}},
+	{ SOptionList:{
+		title:"Set governor",
+		default:`cat /sys/class/devfreq/dfrgx/governor`,
+		action:"generic sys/class/devfreq/dfrgx/governor",
+		values:[userspace, powersave, performance, simple_ondemand,]
+	}},
+	{ SPane:{
+		title:"GPU Frequency"
+	}},
+	{ SSeekBar:{
+		title:"Set max frequency",
+		description:" Set the maximum frequency the GPU scales up to.",
+		unit:" MHz",
+		weight:0.001,
+		default:`cat /sys/class/devfreq/dfrgx/max_freq`,
+		action:"generic /sys/class/devfreq/dfrgx/max_freq",
+		values:[`while read values; do busybox printf "%s, \n" $values; done <  /sys/class/devfreq/dfrgx/available_frequencies`]
+	}},
+	{ SSeekBar:{
+		title:"Set min frequency",
+		description:" Set the minimum frequency the GPU scales down to.",
+		unit:" MHz",
+		weight:0.001,
+		default:`cat /sys/class/devfreq/dfrgx/min_freq`,
+		action:"generic /sys/class/devfreq/dfrgx/min_freq",
+		values:[`while read values; do busybox printf "%s, \n" $values; done < /sys/class/devfreq/dfrgx/available_frequencies`]
+	}},
+    ]
+}
+CTAG

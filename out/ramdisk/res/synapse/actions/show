@@ -1,0 +1,34 @@
+BB=/sbin/busybox;
+
+case $1 in
+touch)
+  echo `cat /sys/class/misc/touchwake/version`
+  ;;
+hard)
+  echo `cat /sys/kernel/cpufreq_hardlimit/version`
+  ;;
+screen)
+  echo `cat /sys/class/mdnie/mdnie/version`
+  ;;
+cpu)
+  echo `cat /sys/devices/system/cpu/cpufreq/vdd_table/vdd_levels`
+  ;;
+dyna)
+  echo `cat /sys/kernel/dyn_fsync/Dyn_fsync_version`
+  ;;
+susp)
+  echo `cat /sys/kernel/power_suspend/power_suspend_version`
+  ;;
+sound)
+  echo `cat /sys/kernel/sound_control_3/gpl_sound_control_version`
+  ;;
+led)
+  echo `cat /sys/class/sec/led/led_xctrl_version`
+  ;;
+speedbin)
+  echo `cat /sys/devices/system/soc/soc0/soc_pvs`
+  ;;
+fast)
+  echo `cat /sys/kernel/fast_charge/info`
+  ;;
+esac

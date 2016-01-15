@@ -1,0 +1,83 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:MISC,
+    elements:[
+    	{ SPane:{
+		title:"TCP Congestion Control",
+		description:" Select your preferred WIFI TCP algorithm. Regulates upload and download affecting throughput in various ways. Default is Westwood+."
+    	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SOptionList:{
+		default:`cat proc/sys/net/ipv4/tcp_congestion_control`,
+		action:"generic proc/sys/net/ipv4/tcp_congestion_control",
+		values:[`while read values; do busybox printf "%s, \n" $values; done < proc/sys/net/ipv4/tcp_available_congestion_control`]
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Sweep2Sleep",
+		description:" Allows you to turn the screen off by swiping UNDER the navigation bar left > right or right > left.",
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+	{ SCheckBox:{
+		label:"Enable or Disable Sweep2Sleep",
+		default:`cat /sys/android_touch/sweep2sleep`,
+		action:"generic /sys/android_touch/sweep2sleep"
+	}},
+	{ SDescription:{
+		description:""
+      	}},
+      	{ SPane:{
+		title:"Kernel Entropy"
+      	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SLiveLabel:{
+		title:"Entropy Available",
+		refresh:1000,
+		action:"live entropy"
+	}},
+	{ SSeekBar:{
+		title:"Read Wakeup Threshold",
+		max:2048, min:64, step:64,
+		default:`cat /proc/sys/kernel/random/read_wakeup_threshold`,
+		action:"generic /proc/sys/kernel/random/read_wakeup_threshold"
+	}},
+	{ SSeekBar:{
+		title:"Write Wakeup Threshold",
+		max:2048, min:64, step:64,
+		default:`cat /proc/sys/kernel/random/write_wakeup_threshold`,
+		action:"generic /proc/sys/kernel/random/write_wakeup_threshold"
+	}},
+      	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"randomize_va_space",
+		description:" Disabling (0) virtual address randomisation may improve GUI responsiveness. Default is 2."
+	}},
+      	{ SDescription:{
+		description:""
+	}},
+	{ SSeekBar:{
+		title:"randomize_va_space",
+		max:2,
+		min:0,
+		step:1,
+		default:`cat /proc/sys/kernel/randomize_va_space`,
+		action:"generic /proc/sys/kernel/randomize_va_space"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+    ]
+}
+CTAG

@@ -1,0 +1,30 @@
+t4k37.ko: libmsrlisthelper.ko
+rmi4.ko:
+videobuf-vmalloc.ko: videobuf-core.ko
+bcm_bt_lpm.ko:
+flashnode.ko:
+videobuf-core.ko:
+fps_throttle.ko:
+atomisp-css2400b0_v21.ko: m10mo_isp.ko videobuf-vmalloc.ko videobuf-core.ko
+ov5670.ko:
+vtsspp.ko:
+pax.ko:
+test_nx.ko:
+tntfs.ko:
+atomisp-css2401a0_v21.ko: m10mo_isp.ko videobuf-vmalloc.ko videobuf-core.ko
+m10mo_isp.ko:
+SOCWATCH1_5.ko:
+m10mo_spi.ko: m10mo_isp.ko
+atomisp-css2401a0_legacy_v21.ko: m10mo_isp.ko videobuf-vmalloc.ko videobuf-core.ko
+cfg80211.ko:
+dfrgx.ko: tngdisp.ko
+sep3_15.ko:
+texfat.ko:
+sky81296.ko:
+tngdisp.ko:
+t4k35.ko:
+arizona-i2c.ko:
+libmsrlisthelper.ko:
+bcmdhd.ko: cfg80211.ko
+vidt_driver.ko:
+mac80211.ko: cfg80211.ko

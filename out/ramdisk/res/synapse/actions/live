@@ -1,0 +1,65 @@
+case $1 in
+  entropy)
+    echo "`cat /proc/sys/kernel/random/entropy_avail`";
+  ;;
+gpu)
+  echo Current frequency: $(($(cat /sys/class/devfreq/dfrgx/cur_freq) / 1000))MHz
+  ;;
+temp)
+  echo CPU TEMP: $(($(cat /sys/class/thermal/thermal_zone0/temp) / 1000))°C
+  ;;
+LiveCPUFrequency)
+  CPU0=`$BB cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq 2> /dev/null`;
+  CPU1=`$BB cat /sys/devices/system/cpu/cpu1/cpufreq/scaling_cur_freq 2> /dev/null`;
+  CPU2=`$BB cat /sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq 2> /dev/null`;
+  CPU3=`$BB cat /sys/devices/system/cpu/cpu3/cpufreq/scaling_cur_freq 2> /dev/null`;
+		
+  if [ -z "$CPU0" ]; then CPU0="Offline"; else CPU0="$((CPU0 / 100)) MHz"; fi;
+  if [ -z "$CPU1" ]; then CPU1="Offline"; else CPU1="$((CPU1 / 100)) MHz"; fi;
+  if [ -z "$CPU2" ]; then CPU2="Offline"; else CPU2="$((CPU2 / 100)) MHz"; fi;
+  if [ -z "$CPU3" ]; then CPU3="Offline"; else CPU3="$((CPU3 / 100)) MHz"; fi;
+		
+$BB echo "Core 0: $CPU0@nCore 1: $CPU1@nCore 2: $CPU2@nCore 3: $CPU3";
+;;
+LiveMemory)
+  while read TYPE MEM KB; do
+	if [ "$TYPE" = "MemTotal:" ]; then
+		TOTAL="$((MEM / 1024)) MB";
+	elif [ "$TYPE" = "MemFree:" ]; then
+		CACHED=$((MEM / 1024));
+	elif [ "$TYPE" = "Cached:" ]; then
+		FREE=$((MEM / 1024));
+	fi;
+  done < /proc/meminfo;
+		
+  FREE="$((FREE + CACHED)) MB";
+  $BB echo "Total: $TOTAL@nFree: $FREE";
+;;
+LiveUpTime)
+  TOTAL=`$BB awk '{ print $1 }' /proc/uptime`;
+  AWAKE=$((`$BB awk '{s+=$2} END {print s}' /sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state` / 1000));
+  SLEEP=`$BB awk "BEGIN { print ($TOTAL - $AWAKE) }"`;
+		
+  PERC_A=`$BB awk "BEGIN { print ( ($AWAKE / $TOTAL) * 100) }"`;
+  PERC_A="`$BB printf "%0.1f\n" $PERC_A`%";
+  PERC_S=`$BB awk "BEGIN { print ( ($SLEEP / $TOTAL) * 100) }"`;
+  PERC_S="`$BB printf "%0.1f\n" $PERC_S`%";
+		
+  TOTAL=`$BB echo - | $BB awk -v "S=$TOTAL" '{printf "%dh:%dm:%ds",S/(60*60),S%(60*60)/60,S%60}'`;
+  AWAKE=`$BB echo - | $BB awk -v "S=$AWAKE" '{printf "%dh:%dm:%ds",S/(60*60),S%(60*60)/60,S%60}'`;
+  SLEEP=`$BB echo - | $BB awk -v "S=$SLEEP" '{printf "%dh:%dm:%ds",S/(60*60),S%(60*60)/60,S%60}'`;
+  $BB echo "Total: $TOTAL (100.0%)@nSleep: $SLEEP ($PERC_S)@nAwake: $AWAKE ($PERC_A)";
+;;
+LiveUnUsed)
+  UNUSED="";
+  while read FREQ TIME; do
+	FREQ="$((FREQ / 100)) MHz";
+	if [ $TIME -lt "100" ]; then
+		UNUSED="$UNUSED$FREQ, ";
+	fi;
+  done < /sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state;
+		
+  UNUSED=${UNUSED%??};
+  $BB echo "$UNUSED";
+;;
+esac;

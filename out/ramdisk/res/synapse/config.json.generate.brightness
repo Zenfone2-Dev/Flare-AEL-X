@@ -1,0 +1,20 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:BRIGHTNESS CONTROL,
+    elements:[
+	{ SPane:{
+		title:"Control the Minimum Brightness Environment"
+	}},
+	{ SSeekBar:{
+		description:"Set minimum brightness. Turn screen off and then back on once for changes to take effect. Default is 2.",
+		min:2,
+		max:15,
+		step:1,
+		default:`cat /sys/class/backlight/psb-bl/min_brightness`,
+		action:"generic /sys/class/backlight/psb-bl/min_brightness"
+	}},
+    ]
+}
+CTAG

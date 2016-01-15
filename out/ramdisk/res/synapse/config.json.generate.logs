@@ -1,0 +1,33 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:"LOGS and Profiles",
+    elements:[
+	{ SPane:{
+		title:"Log Creation"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SButton:{
+		label:"Save logcat",
+		action:"log logcat"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SButton:{
+		label:"Save dmesg",
+		action:"log dmesg"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SButton:{
+		label:"Save last_kmsg",
+		action:"log kmsg"
+	}},
+    ]
+}
+CTAG

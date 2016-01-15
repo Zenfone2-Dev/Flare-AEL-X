@@ -1,0 +1,106 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:"INFO",
+    elements:[
+	{ SPane:{
+		title:"Kernel Build by",
+		description:" Friedrich420"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Kernel Thread",
+		description:" <a href='http://echoerom.com'>Echoe Forum</a>"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"If you feel like supporting us",
+		description:" <a href='https://goo.gl/VQvYUN'>DONATE</a>"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Source",
+		description:" Modified & compiled from ASUS OSRC: <a href='https://github.com/friedrich420/Ael-Zen-Kernel-Asus-Zenfone2-'>GitHub</a>."
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Thoughts"
+	}},
+	{ SDescription:{
+		description:"Whatever the mind of man can conceive and believe, it can achieve. –Napoleon Hill<a href=''></a>"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Kernel Version"
+	}},
+	{ SLiveLabel:{
+		refresh:10000,
+		action:"default version"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Build"
+	}},
+	{ SLiveLabel:{
+		refresh:10000,
+		action:"default build"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Android Version"
+	}},
+	{ SLiveLabel:{
+		refresh:10000,
+		action:"default android_version"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Build Date"
+	}},
+	{ SLiveLabel:{
+		refresh:10000,
+		action:"default date"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Baseband"
+	}},
+	{ SLiveLabel:{
+		refresh:10000,
+		action:"default baseband"
+	}},
+	{ SDescription:{
+		description:""
+	}},
+	{ SPane:{
+		title:"Serial"
+	}},
+	{ SLiveLabel:{
+		refresh:10000,
+		action:"default serial"
+	}},
+	{ SDescription:{
+		description:" "
+	}},
+    ]
+}
+CTAG
