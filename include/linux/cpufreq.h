@@ -21,7 +21,6 @@
 #include <linux/workqueue.h>
 #include <linux/cpumask.h>
 #include <asm/div64.h>
-#include <asm/cputime.h>
 
 #define CPUFREQ_NAME_LEN 16
 /* Print length for names. Extra 1 space for accomodating '\n' in prints */
@@ -444,11 +443,5 @@ typedef enum govinuse whichgov;
 extern whichgov ta_active;
 void set_cpufreq_boost_ta(unsigned int enable);
 void set_cpufreq_boost_ya(unsigned int enable);
-
-/*********************************************************************
- *                         CPUFREQ STATS                             *
- *********************************************************************/
-
-void acct_update_power(struct task_struct *p, cputime_t cputime);
 
 #endif /* _LINUX_CPUFREQ_H */
