@@ -1151,9 +1151,11 @@ bool mrst_get_vbt_data(struct drm_psb_private *dev_priv)
 	u8 primary_panel;
 	u8 number_desc = 0;
 	u8 panel_name_id[PANEL_NAME_MAX_LEN+1] = {0};
-	struct intel_mid_vbt *pVBT = (struct intel_mid_vbt *) &dev_priv->vbt_data;
+	struct intel_mid_vbt *pVBT = &dev_priv->vbt_data;
 	void *panel_desc;
 	struct pci_dev *pci_gfx_root = pci_get_bus_and_slot(0, PCI_DEVFN(2, 0));
+	mdfld_dsi_encoder_t mipi_mode;
+	int ret = 0, len = 0;
 
 	PSB_DEBUG_ENTRY("\n");
 
@@ -4127,7 +4129,6 @@ ssize_t rgx_HWR_control_write(struct file *file, const char *buffer,
 	char buf[2];
 	int  rgx_HWR_control;
 	struct drm_psb_private *dev_priv = NULL;
-	struct drm_minor *minor;
 
 	if (gpDrmDevice == NULL || gpDrmDevice->dev_private == NULL)
 		return -EINVAL;
@@ -4135,10 +4136,13 @@ ssize_t rgx_HWR_control_write(struct file *file, const char *buffer,
 		dev_priv = (struct drm_psb_private *)gpDrmDevice->dev_private;
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
-	minor = (struct drm_minor *) PDE_DATA(file_inode(file));
+	struct drm_minor *minor =
+		(struct drm_minor *) PDE_DATA(file_inode(file));
 #else
-	minor = (struct drm_minor *) PDE(file->f_path.dentry->d_inode)->data;
+	struct drm_minor *minor =
+		(struct drm_minor *) PDE(file->f_path.dentry->d_inode)->data;
 #endif
+	struct drm_device *dev = minor->dev;
 
 	if (count != sizeof(buf)) {
 		return -EINVAL;
@@ -4179,7 +4183,6 @@ static struct file_operations rgx_HWR_control_proc_fops = {
 	.release= rgx_HWR_control_proc_close,
 };
 
-#ifdef CONFIG_SUPPORT_HDMI
 static int rgx_HWR_control_proc_init(struct drm_minor *minor)
 {
 	struct proc_dir_entry *rgx_HWR_control_setting;
@@ -4193,7 +4196,6 @@ static int rgx_HWR_control_proc_init(struct drm_minor *minor)
 
 	return 0;
 }
-#endif
 
 #endif /* CONFIG_SUPPORT_TRIGER_RGX_HWR */
 
@@ -4242,13 +4244,15 @@ static void psb_shutdown(struct pci_dev *pdev)
 
 static int psb_proc_init(struct drm_minor *minor)
 {
+	struct proc_dir_entry *csc_setting;
+
 #ifdef CONFIG_SUPPORT_HDMI
 	psb_hdmi_proc_init(minor);
 
 #ifdef CONFIG_SUPPORT_TRIGER_RGX_HWR
 	rgx_HWR_control_proc_init(minor);
 #endif
-	proc_create_data(CSC_PROC_ENTRY, 0644, minor->proc_root, &psb_csc_proc_fops, minor);
+	csc_setting = proc_create_data(CSC_PROC_ENTRY, 0644, minor->proc_root, &psb_csc_proc_fops, minor);
 #endif
 	return 0;
 }
@@ -4558,7 +4562,7 @@ static __init int parse_hdmi_edid(char *arg)
 early_param("hdmi_edid", parse_hdmi_edid);
 #endif
 
-static ssize_t lcd_unique_id_read(struct file *file, char __user *buffer,
+static int lcd_unique_id_read(struct file *file, char __user *buffer,
 				    size_t count, loff_t *ppos)
 {
 	int len = 0;
@@ -4575,13 +4579,13 @@ static ssize_t lcd_unique_id_read(struct file *file, char __user *buffer,
 
 	return ret;
 }
-static ssize_t lcd_unique_id_write(struct file *file, const char *buffer,
+static int lcd_unique_id_write(struct file *file, const char *buffer,
 			  size_t count, loff_t *ppos)
 {
 	return 0;
 }
 
-static ssize_t panel_id_read(struct file *file, char __user *buffer,
+static int panel_id_read(struct file *file, char __user *buffer,
 				    size_t count, loff_t *ppos)
 {
 	int len = 0;
@@ -4601,7 +4605,7 @@ static ssize_t panel_id_read(struct file *file, char __user *buffer,
 
 	return ret;
 }
-static ssize_t panel_id_write(struct file *file, const char *buffer,
+static int panel_id_write(struct file *file, const char *buffer,
 			  size_t count, loff_t *ppos)
 {
 	return 0;

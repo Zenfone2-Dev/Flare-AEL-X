@@ -31,7 +31,6 @@ static int mrfl_pb_irq_ack(struct intel_msic_power_btn_platform_data *pdata)
 	return 0;
 }
 
-#if 0
 static int moor_pb_irq_ack(struct intel_msic_power_btn_platform_data *pdata)
 {
 	intel_scu_ipc_update_register(SCOVE_PBIRQ, 0, MSIC_PWRBTNM);
@@ -39,7 +38,6 @@ static int moor_pb_irq_ack(struct intel_msic_power_btn_platform_data *pdata)
 
 	return 0;
 }
-#endif
 
 void __init *msic_power_btn_platform_data(void *info)
 {
