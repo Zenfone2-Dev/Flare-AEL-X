@@ -4,18 +4,19 @@ service init_factorylog /system/bin/sh /system/etc/init_factorylogtool.sh
     oneshot
 
 service init_logdate /system/bin/logcontrol logdumps date
+    user system
+    group system
     disabled
     oneshot
-
 
 service initfacmodem /system/bin/modemfaclog
     class main
     disabled
 
-#on post-fs-data
-#   start init_logdate
-on property:persist.asuslog.set.date=1
-    start init_logdate
+on post-fs-data
+   start init_logdate
+#on property:persist.asuslog.set.date=1
+#    start init_logdate
 
 on property:persist.asuslog.dump.init=1
     start logtoolinit
@@ -161,7 +162,7 @@ service toolcommand /system/bin/toolcommand
     class main
     user root
     group root
-   seclable u:r:fdctool:s0
+   seclabel u:r:fdctool:s0
    disabled
    oneshot
 
