@@ -22,7 +22,7 @@
 #endif
 
 #define SYSTEM_SET_BRIGHTNESS 15
-static unsigned long min_brightness=2;
+static unsigned long min_brightness=15;
 
 static const char *const backlight_types[] = {
 	[BACKLIGHT_RAW] = "raw",
