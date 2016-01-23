@@ -196,6 +196,12 @@ config CPU_FREQ_DEFAULT_GOV_WHEATLEY
 	---help---
 	  Use the CPUFreq governor 'wheatley' as default.
 
+config CPU_FREQ_DEFAULT_GOV_CYAN
+	bool "cyan"
+	select CPU_FREQ_GOV_CYAN
+	help
+	cyan' - an interactive based optimized governor!
+
 endchoice
 
 config CPU_FREQ_GOV_PERFORMANCE
@@ -367,6 +373,13 @@ config CPU_FREQ_GOV_ASSWAX
            help
              asswax' - a "smart" optimized governor!
              If in doubt, say N.
+
+config CPU_FREQ_GOV_CYAN
+	tristate "'cyan' cpufreq governor"
+	depends on CPU_FREQ
+	default y
+	help
+	cyan' - an interactive based optimized governor!
 
 config GENERIC_CPUFREQ_CPU0
 	tristate "Generic CPU0 cpufreq driver"
