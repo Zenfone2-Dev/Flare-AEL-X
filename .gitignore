@@ -32,6 +32,24 @@ modules.builtin
 *.lzo
 *.patch
 *.gcno
+*.rej
+*.config
+*.dtb
+*.rej
+*.orig
+*zImage
+*zImage-dtb
+*boot.img
+*Image
+arch/arm/boot/dts/*.dtb
+arch/arm/boot/dts/*.reverse.dts
+dt.img
+arch/arm/boot/compressed/piggy.gzip
+kernel/config_data.h
+scripts/recordmcount
+kernel/usr/*
+kernel/hz.bc
+Package/*
 *.zip
 
 #
