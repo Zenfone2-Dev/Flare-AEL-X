@@ -202,6 +202,12 @@ config CPU_FREQ_DEFAULT_GOV_CYAN
 	help
 	cyan' - an interactive based optimized governor!
 
+config CPU_FREQ_DEFAULT_GOV_BLUACTIVE
+	bool "bluactive"
+	select CPU_FREQ_GOV_BLUACTIVE
+	help
+	Use the CPUFreq governor 'bluactive' as default.
+
 endchoice
 
 config CPU_FREQ_GOV_PERFORMANCE
@@ -380,6 +386,12 @@ config CPU_FREQ_GOV_CYAN
 	default y
 	help
 	cyan' - an interactive based optimized governor!
+
+config CPU_FREQ_GOV_BLUACTIVE
+	tristate "'bluactive' cpufreq governor"
+	depends on CPU_FREQ
+	help
+	  'bluactive' - less aggressive version of conservative
 
 config GENERIC_CPUFREQ_CPU0
 	tristate "Generic CPU0 cpufreq driver"
