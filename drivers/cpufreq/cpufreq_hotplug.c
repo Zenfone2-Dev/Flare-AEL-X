@@ -33,10 +33,10 @@
 #define DEF_SAMPLING_DOWN_FACTOR            (1)
 #define MAX_SAMPLING_DOWN_FACTOR            (100000)
 #define MICRO_FREQUENCY_DOWN_DIFFERENTIAL   (15)
-#define MIN_FREQUENCY_DOWN_DIFFERENTIAL     (5)
+#define MIN_FREQUENCY_DOWN_DIFFERENTIAL     (3)
 #define MAX_FREQUENCY_DOWN_DIFFERENTIAL     (20)
 #define MICRO_FREQUENCY_UP_THRESHOLD        (85)
-#define MICRO_FREQUENCY_MIN_SAMPLE_RATE     (20000)
+#define MICRO_FREQUENCY_MIN_SAMPLE_RATE     (80000)
 #define MIN_FREQUENCY_UP_THRESHOLD          (21)
 #define MAX_FREQUENCY_UP_THRESHOLD          (100)
 
@@ -45,8 +45,8 @@
 #define MIN_CPU_DOWN_DIFFERENTIAL   (0)
 #define MAX_CPU_DOWN_DIFFERENTIAL   (30)
 
-#define DEF_CPU_UP_THRESHOLD        (90)
-#define MICRO_CPU_UP_THRESHOLD      (30)
+#define DEF_CPU_UP_THRESHOLD        (45)
+#define MICRO_CPU_UP_THRESHOLD      (45)
 #define MIN_CPU_UP_THRESHOLD        (10)
 #define MAX_CPU_UP_THRESHOLD        (100)
 
@@ -1134,8 +1134,8 @@ static int __init cpufreq_gov_dbs_init(void)
 			MIN_SAMPLING_RATE_RATIO * jiffies_to_usecs(10);
 	}
 
-	dbs_tuners_ins.cpu_num_limit = num_possible_cpus();
-	dbs_tuners_ins.cpu_num_base = 1;
+	dbs_tuners_ins.cpu_num_limit = 4;
+	dbs_tuners_ins.cpu_num_base = 2;
 
 	if (dbs_tuners_ins.cpu_num_limit > 1)
 		dbs_tuners_ins.cpu_hotplug_disable1 = 0;

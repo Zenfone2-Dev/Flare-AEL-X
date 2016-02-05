@@ -433,7 +433,7 @@ config CPU_FREQ_GOV_INTERACTIVEX
 
 config CPU_FREQ_GOV_HOTPLUG
 	tristate "'hotplug' cpufreq governor"
-	select CPU_FREQ_TABLE
+	depends on CPU_FREQ && NO_HZ && HOTPLUG_CPU
 	help
 	  'hotplug' - this driver mimics the frequency scaling behavior
 	  in 'ondemand', but with several key differences.  First is

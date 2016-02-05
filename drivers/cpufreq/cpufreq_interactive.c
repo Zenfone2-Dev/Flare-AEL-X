@@ -133,6 +133,53 @@ static struct cpufreq_interactive_tunables *common_tunables;
 static struct kobject *get_governor_parent_kobj(struct cpufreq_policy *policy);
 static struct attribute_group *get_sysfs_attr(void);
 
+<<<<<<< HEAD
+=======
+#ifdef CONFIG_IRQ_TIME_ACCOUNTING
+DECLARE_PER_CPU(u64, cpu_hardirq_time);
+DECLARE_PER_CPU(u64, cpu_softirq_time);
+
+static inline u64 irq_time_read(int cpu)
+{
+	/* Return the irq time(us) */
+	u64 irq_time;
+	irq_time = per_cpu(cpu_softirq_time, cpu) + per_cpu(cpu_hardirq_time, cpu);
+	do_div(irq_time, 1000);
+	return irq_time;
+}
+#endif /* CONFIG_IRQ_TIME_ACCOUNTING */
+static void __cpuinit early_suspend_offline_cpus(struct early_suspend *h)
+{
+	unsigned int cpu;
+	for_each_possible_cpu(cpu)
+	{
+		if (cpu<2) //begin offline work at core 2
+			continue;
+		
+		if (cpu_online(cpu) && num_online_cpus() > 2) //get 3 cores down, cores 2, 3 and 4 
+			cpu_down(cpu);
+	}
+	
+}
+
+static void __cpuinit late_resume_online_cpus(struct early_suspend *h)
+{
+	unsigned int cpu;	
+	for_each_possible_cpu(cpu)
+	{
+		if (!cpu_online(cpu) && num_online_cpus() < 4) //get all up 
+			cpu_up(cpu);
+	}
+	
+}
+
+static struct early_suspend hotplug_auxcpus_desc __refdata = {
+	.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN,
+	.suspend = early_suspend_offline_cpus,
+	.resume = late_resume_online_cpus,
+};
+
+>>>>>>> e4d8656... add autosmp driver
 static inline cputime64_t get_cpu_idle_time_jiffy(unsigned int cpu,
 						  cputime64_t *wall)
 {
