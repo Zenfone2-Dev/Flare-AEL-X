@@ -16,6 +16,23 @@ cat << CTAG
 		action:"generic proc/sys/net/ipv4/tcp_congestion_control",
 		values:[`while read values; do busybox printf "%s, \n" $values; done < proc/sys/net/ipv4/tcp_available_congestion_control`]
 	}},
+	{ SPane:{
+            title:"Wakelock control",
+            description:"Enter 1 to 8 (1 = stock, higher = lower wake time) for wlan_rx and wlan_ctrl wakelock control."
+   	}},
+	{ SDescription:{
+		description:""
+	}},
+    	{ SSeekBar:{
+            title:"Wireless wakelock timeout control",
+            description:"",
+            unit:"",
+            min:1,
+            max:8,
+            step:1,
+            default:`cat /sys/module/bcmdhd/parameters/wl_divide`,
+            action:"generic /sys/module/bcmdhd/parameters/wl_divide"
+    	}},
 	{ SDescription:{
 		description:""
 	}},
