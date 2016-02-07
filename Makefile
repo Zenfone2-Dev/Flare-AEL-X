@@ -402,6 +402,9 @@ KBUILD_CFLAGS   := $(ANDROID_TOOLCHAIN_FLAGS) \
  		   -std=gnu89 \
 		   $(KERNEL_MODS)
 
+# L1/L2 cache size parameters
+KBUILD_CFLAGS	+= --param l1-cache-size=32 --param l1-cache-line-size=32 --param l2-cache-size=2048
+
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
