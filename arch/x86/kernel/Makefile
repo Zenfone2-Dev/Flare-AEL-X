@@ -55,6 +55,7 @@ obj-$(CONFIG_APM)		+= apm.o
 obj-$(CONFIG_SMP)		+= smp.o
 obj-$(CONFIG_SMP)		+= smpboot.o
 obj-$(CONFIG_ASMP) 		+= autosmp.o
+obj-$(CONFIG_MSM_HOTPLUG) 	+= msm_hotplug.o
 obj-$(CONFIG_SMP)		+= tsc_sync.o
 obj-$(CONFIG_SMP)		+= setup_percpu.o
 obj-$(CONFIG_X86_MPPARSE)	+= mpparse.o
