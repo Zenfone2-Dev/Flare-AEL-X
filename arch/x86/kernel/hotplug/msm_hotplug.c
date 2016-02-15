@@ -26,16 +26,16 @@
 #include <linux/tick.h>
 
 #define MSM_HOTPLUG		"msm_hotplug"
-#define DEFAULT_UPDATE_RATE	HZ / 10
+#define DEFAULT_UPDATE_RATE	15
 #define START_DELAY		HZ * 20
 #define MIN_INPUT_INTERVAL	150 * 1000L
-#define DEFAULT_HISTORY_SIZE	10
-#define DEFAULT_DOWN_LOCK_DUR	1000
-#define DEFAULT_BOOST_LOCK_DUR	4000 * 1000L
-#define DEFAULT_NR_CPUS_BOOSTED	2
+#define DEFAULT_HISTORY_SIZE	5
+#define DEFAULT_DOWN_LOCK_DUR	1500
+#define DEFAULT_BOOST_LOCK_DUR	3000 * 1000L
+#define DEFAULT_NR_CPUS_BOOSTED	0
 #define DEFAULT_MIN_CPUS_ONLINE	1
 #define DEFAULT_MAX_CPUS_ONLINE	NR_CPUS
-#define DEFAULT_FAST_LANE_LOAD	85
+#define DEFAULT_FAST_LANE_LOAD	130
 u64 get_cpu_idle_time(unsigned int cpu, u64 *wall, int io_busy);
 static unsigned int debug = 0;
 module_param_named(debug_mask, debug, uint, 0644);
@@ -544,7 +544,7 @@ static void msm_hotplug_resume(struct work_struct *work)
 		ret = cpufreq_get_policy(&policy, cpu);
 		if (ret)
 			continue;
-		//cpufreq_verify_within_cpu_limits(&policy);
+		cpufreq_verify_within_cpu_limits(&policy);
 		if (!cpu)
 			max_freq = policy.max;
 	}
