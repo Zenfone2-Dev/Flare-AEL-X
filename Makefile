@@ -204,7 +204,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/x86/ -e s/x86_64/x86/ \
 # Default value for CROSS_COMPILE is not to prefix executables
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
 ARCH		?= $(CARCH)
-CROSS_COMPILE	?= $(CCACHE) /home/friedrich420/kernel/x86_64-toolchain-GCC-5.3.0/bin/x86_64-linux-
+CROSS_COMPILE	?= $(CCACHE) /home/friedrich420/kernel/x86_64-linaro-gcc-5.2.1/bin/x86_64-linux-
 
 
 # Architecture as present in compile.h
