@@ -248,6 +248,11 @@ config CPU_FREQ_DEFAULT_GOV_INTEL
 	  'intel' governor for better perfromance and power with Intel
 	  mobile platforms.
 
+config CPU_FREQ_DEFAULT_GOV_SMARTASSH3
+  	bool "smartassH3"
+  	select CPU_FREQ_GOV_SMARTASSH3
+  	help
+
 endchoice
 
 config CPU_FREQ_GOV_PERFORMANCE
@@ -497,7 +502,11 @@ config CPU_FREQ_GOV_INTEL
 
 	  If in doubt, say N.
 
-
+config CPU_FREQ_GOV_SMARTASSH3
+  	tristate "'smartassH3' cpufreq governor"
+  	depends on CPU_FREQ
+  	help
+    	'smartassH3' - a "smart" governor
 
 config GENERIC_CPUFREQ_CPU0
 	tristate "Generic CPU0 cpufreq driver"
