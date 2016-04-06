@@ -45,8 +45,7 @@ void devfreq_policy_remove_files(struct devfreq *devfreq,
 
 
 static int devfreq_simple_ondemand_func(struct devfreq *df,
-					unsigned long *freq,
-					u32 *flag)
+					unsigned long *freq)
 {
 	struct devfreq_dev_status stat;
 	struct devfreq_simple_ondemand_data *data = df->data;
