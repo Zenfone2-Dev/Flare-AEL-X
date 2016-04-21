@@ -32,9 +32,16 @@ cd /tmp/anykernel;
 unzip -o "$ZIP";
 
 ui_print "$(file_getprop /tmp/anykernel/anykernel.sh kernel.string)";
-ui_print " ";
-ui_print "Ael Zen (zipped via AnyKernel2 by osm0sis @ xda-developers)";
-ui_print " ";
+ui_print "              ========================== ";
+ui_print "                 ________ __    __  ";
+ui_print "                /  _____/ \ \  / / ";
+ui_print "                |  |___    \ \/ /  ";
+ui_print "                |  ___/     |  |   ";
+ui_print "                |  |       / /\ \  ";
+ui_print "                |__|LARE  /_/  \_\ ";
+ui_print "                           KERNEL FlareX ";
+ui_print "              ========================== ";
+
 /sbin/busybox mount /system;
 
 if [ "$(file_getprop /tmp/anykernel/anykernel.sh do.devicecheck)" == 1 ]; then
@@ -59,7 +66,7 @@ if [ "$(file_getprop /tmp/anykernel/anykernel.sh do.initd)" == 1 ]; then
   set_perm_recursive 0 0 0755 0755 /system/etc/init.d;
 fi;
 
-ui_print "Installing Ael Zen kernel...";
+ui_print "Installing FlareM kernel...";
 /sbin/sh /tmp/anykernel/anykernel.sh;
 if [ "$(cat /tmp/anykernel/exitcode)" == 1 ]; then 
   umount /system;
@@ -79,5 +86,5 @@ fi;
 
 umount /system;
 ui_print " ";
-ui_print "Done!";
+ui_print "Installation Failure, just reboot and enjoy ;)";
 
