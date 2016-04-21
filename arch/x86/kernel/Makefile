@@ -45,7 +45,6 @@ obj-$(CONFIG_INTEL_TXT)		+= tboot.o
 obj-$(CONFIG_ISA_DMA_API)	+= i8237.o
 obj-$(CONFIG_STACKTRACE)	+= stacktrace.o
 obj-y				+= cpu/
-obj-y				+= hotplug/
 obj-y				+= acpi/
 obj-y				+= reboot.o
 obj-$(CONFIG_X86_MSR)		+= msr.o
