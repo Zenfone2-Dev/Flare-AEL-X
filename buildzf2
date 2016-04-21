@@ -17,7 +17,7 @@ export VER=v$1
 echo "Setting Extra Version"
 export EV=EXTRAVERSION=_FlareX_v$1
 echo "Setting Defconfig"
-export DEFCONFIG=flareX_defconfig
+export DEFCONFIG=x86_64_moor_defconfig
 echo "Setting bzImage Location For FlareX kernel"
 export BZIMAGE=arch/x86/boot/bzImage
 echo "Enabling Graphite Optimizations"
