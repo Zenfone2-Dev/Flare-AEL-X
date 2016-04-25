@@ -66,9 +66,30 @@ static ssize_t led_max_brightness_show(struct device *dev,
 	return sprintf(buf, "%u\n", led_cdev->max_brightness);
 }
 
+static int blink_speed = 2;
+static ssize_t rate_show(struct device *dev,
+        struct device_attribute *attr, char *buf)
+{
+	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+	int len=0;
+
+	len += sprintf(buf + len, "%d\n", blink_speed);
+	return len;
+}
+static ssize_t rate_store(struct device *dev,
+        struct device_attribute *attr,
+        const char *buf, size_t count)
+{
+	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+	sscanf(buf, "%d", &blink_speed);
+	return count;
+}
+
+
 static struct device_attribute led_class_attrs[] = {
 	__ATTR(brightness, 0644, led_brightness_show, led_brightness_store),
 	__ATTR(max_brightness, 0444, led_max_brightness_show, NULL),
+	__ATTR(rate, 0644, rate_show, rate_store),
 #ifdef CONFIG_LEDS_TRIGGERS
 	__ATTR(trigger, 0644, led_trigger_show, led_trigger_store),
 #endif

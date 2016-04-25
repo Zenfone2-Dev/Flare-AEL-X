@@ -58,6 +58,7 @@
 #define S_FULLY_OFF_TIME_REG	0x07
 
 /* +++global variables+++ */
+extern int blink_speed=2;
 static int red_led_flag, green_led_flag, red_blink_flag, green_blink_flag, power_on_flag;
 static struct i2c_client *led_client;
 /* ---global variables--- */
@@ -175,8 +176,22 @@ static int ms_to_value(int ms)
 {
 	int i;
 
-	/* Divide by 2 because the value is used for both the time in state and fade time */
-	ms /= 2;
+	/* We can allow it to be directly manipulated via kernel parameters for stock kernel */
+	/* I have tested values as *4, *2, /2 and /4. */
+	/*       *4 is much much slower 	     */
+	/*    *2 is much closer to stock I think.   */
+	/*        /2 is a bit faster.		   */
+	/*        /4 is the fastest. 	    	  */
+	
+	if(blink_speed == 0) {
+		ms /= 4;
+	} else if(blink_speed = 1) {
+		ms /= 2;
+	} else if(blink_speed = 3) {
+		ms *= 4; 
+	} else {
+		ms *= 2; 
+	}
 
 	for (i = 0; i < N_BLINK_MS-1 && blink_ms[i] < ms; i++) {}
 	return 0x40 + i;
@@ -245,6 +260,7 @@ static ssize_t blink_store(struct device *dev,
 #endif
 	return count;
 }
+
 static DEVICE_ATTR(blink, 0644,
         blink_show, blink_store);
 
