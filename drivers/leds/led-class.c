@@ -66,7 +66,7 @@ static ssize_t led_max_brightness_show(struct device *dev,
 	return sprintf(buf, "%u\n", led_cdev->max_brightness);
 }
 
-static int blink_speed = 2;
+int blink_speed = 2;
 static ssize_t rate_show(struct device *dev,
         struct device_attribute *attr, char *buf)
 {

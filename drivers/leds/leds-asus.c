@@ -58,7 +58,7 @@
 #define S_FULLY_OFF_TIME_REG	0x07
 
 /* +++global variables+++ */
-extern int blink_speed=2;
+extern int blink_speed;
 static int red_led_flag, green_led_flag, red_blink_flag, green_blink_flag, power_on_flag;
 static struct i2c_client *led_client;
 /* ---global variables--- */
@@ -183,15 +183,14 @@ static int ms_to_value(int ms)
 	/*        /2 is a bit faster.		   */
 	/*        /4 is the fastest. 	    	  */
 	
-	if(blink_speed == 0) {
+	if(blink_speed == 0)
 		ms /= 4;
-	} else if(blink_speed = 1) {
+	else if(blink_speed == 1)
 		ms /= 2;
-	} else if(blink_speed = 3) {
+	else if(blink_speed == 3)
 		ms *= 4; 
-	} else {
+	else
 		ms *= 2; 
-	}
 
 	for (i = 0; i < N_BLINK_MS-1 && blink_ms[i] < ms; i++) {}
 	return 0x40 + i;
