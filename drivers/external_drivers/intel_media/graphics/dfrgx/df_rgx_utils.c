@@ -28,7 +28,6 @@
 #include "dev_freq_debug.h"
 
 extern int is_tng_a0;
-extern int gpu_freq_get_max_fuse_setting(void);
 
 struct gpu_freq_thresholds a_governor_profile[] = {
 			/* low, high thresholds for Performance profile */
@@ -36,7 +35,7 @@ struct gpu_freq_thresholds a_governor_profile[] = {
 			/* low, high thresholds for Power Save profile*/
 			{80, 95},
 			/* low, high Custom thresholds */
-			{67, 85},
+			{50, 100},
 			/* low, high Performance */
 			{25, 45}
 			};
@@ -51,7 +50,10 @@ unsigned int df_rgx_is_valid_freq(unsigned long int freq)
 {
 	unsigned int valid = 0;
 	int i;
-	int a_size = sku_levels();
+	int a_size = NUMBER_OF_LEVELS;
+
+	if(!is_tng_a0)
+		a_size = NUMBER_OF_LEVELS_B0;
 
 	DFRGX_DPF(DFRGX_DEBUG_HIGH, "%s freq: %lu\n",
 			__func__, freq);
@@ -78,8 +80,11 @@ unsigned int df_rgx_is_valid_freq(unsigned long int freq)
  */
 int df_rgx_get_util_record_index_by_freq(unsigned long freq)
 {
+	int n_levels = NUMBER_OF_LEVELS;
 	int i = 0;
-	int n_levels = sku_levels();
+
+	if(!is_tng_a0)
+		n_levels = NUMBER_OF_LEVELS_B0;
 
 	for (i = 0; i < n_levels; i++) {
 		if (freq == a_available_state_freq[i].freq)
@@ -107,6 +112,10 @@ unsigned int df_rgx_request_burst(struct df_rgx_data_s *pdfrgx_data,
 	unsigned long freq = a_available_state_freq[current_index].freq;
 	int new_index;
 	unsigned int burst = DFRGX_NO_BURST_REQ;
+	int n_levels = NUMBER_OF_LEVELS;
+
+	if(!is_tng_a0)
+		n_levels = NUMBER_OF_LEVELS_B0;
 
 	new_index = df_rgx_get_util_record_index_by_freq(freq);
 
@@ -117,16 +126,12 @@ unsigned int df_rgx_request_burst(struct df_rgx_data_s *pdfrgx_data,
 	if (util_percentage > a_governor_profile[pdfrgx_data->g_profile_index].util_th_high
 		&& new_index < pdfrgx_data->g_max_freq_index) {
 		/* Provide recommended burst*/
-		pdfrgx_data->gpu_utilization_record_index = pdfrgx_data->g_max_freq_index;
+		pdfrgx_data->gpu_utilization_record_index = new_index+1;
 		burst = DFRGX_BURST_REQ;
 	} else if (util_percentage < a_governor_profile[pdfrgx_data->g_profile_index].util_th_low
 		&& new_index > pdfrgx_data->g_min_freq_index) {
 		/* Provide recommended unburst*/
-		pdfrgx_data->gpu_utilization_record_index = pdfrgx_data->g_min_freq_index;
-		burst = DFRGX_UNBURST_REQ;
-	} else if (new_index < pdfrgx_data->g_min_freq_index) {
-		/* If frequency is throttled, request return to min */
-		pdfrgx_data->gpu_utilization_record_index = pdfrgx_data->g_min_freq_index;
+		pdfrgx_data->gpu_utilization_record_index = new_index-1;
 		burst = DFRGX_UNBURST_REQ;
 	}
 
@@ -150,7 +155,7 @@ int df_rgx_set_governor_profile(const char *governor_name,
 	else if (!strncmp(governor_name, "powersave", DEVFREQ_NAME_LEN))
 		g_dfrgx->g_profile_index = DFRGX_TURBO_PROFILE_POWERSAVE;
 	else if (!strncmp(governor_name, "simple_ondemand", DEVFREQ_NAME_LEN)) {
-		g_dfrgx->g_profile_index = DFRGX_TURBO_PROFILE_CUSTOM;
+		g_dfrgx->g_profile_index = DFRGX_TURBO_PROFILE_SIMPLE_ON_DEMAND;
 		ret = 1;
 	} else if (!strncmp(governor_name, "userspace", DEVFREQ_NAME_LEN))
 		g_dfrgx->g_profile_index = DFRGX_TURBO_PROFILE_USERSPACE;
@@ -158,17 +163,3 @@ int df_rgx_set_governor_profile(const char *governor_name,
 	return ret;
 }
 
-/**
- * df_rgx_is_max_fuse_set() -Checks setting of fuse to determine if
- * additional max frequency (640 MHz) should be supported.
- * Function return value: 1 if set, 0 otherwise.
- */
-int df_rgx_is_max_fuse_set(void)
-{
-//	Of course we want 640MHz
-//	int fuse_val = 0;
-//	fuse_val = gpu_freq_get_max_fuse_setting();
-//	if (fuse_val == 0x4) /* 640 MHz */
-//		return 1;
-	return 1;
-}

@@ -41,7 +41,7 @@
 #define MAX_NUM_SAMPLES		10
 
 /*Profiling Information - */
-struct gpu_profiling_record a_profiling_info[NUMBER_OF_LEVELS_MAX_FUSE];
+struct gpu_profiling_record a_profiling_info[NUMBER_OF_LEVELS_B0];
 
 /**
  * gpu_profiling_records_init() - Initializes profiling array.
@@ -94,15 +94,11 @@ int gpu_profiling_records_show(char *buf)
 {
 	int i;
 	int ret = 0;
-	int n_levels = NUMBER_OF_LEVELS;
-
-	if(df_rgx_is_max_fuse_set())
-		n_levels = NUMBER_OF_LEVELS_MAX_FUSE;
 
 	DFRGX_DPF(DFRGX_DEBUG_HIGH, "%s\n",
 		__func__);
 
-	for (i = 0; i < n_levels; i++) {
+	for (i = 0; i < NUMBER_OF_LEVELS_B0; i++) {
 		ret += sprintf((buf+ret), "Time for %lu KHZ : %llu ms\n",
 			a_available_state_freq[i].freq,
 			a_profiling_info[i].time_ms);
@@ -230,7 +226,7 @@ static long set_desired_frequency_khz(struct busfreq_data *bfdata,
 		prev_util_record_index =
 			df_rgx_get_util_record_index_by_freq(prev_freq);
 		if ((prev_util_record_index >= 0)
-			&& (prev_util_record_index < NUMBER_OF_LEVELS_MAX_FUSE))
+			&& (prev_util_record_index < NUMBER_OF_LEVELS_B0))
 			gpu_profiling_records_update_entry(prev_util_record_index, 0);
 
 		if (bfdata->g_dfrgx_data.gpu_utilization_record_index >= 0)
@@ -283,8 +279,22 @@ static void dfrgx_add_sample_data(struct df_rgx_data_s *g_dfrgx,
 	static int num_samples;
 	static int sum_samples_active;
 	int ret = 0;
+	int active_high = util_stats_sample.ui64GpuStatActiveHigh;
 
-	sum_samples_active += ((util_stats_sample.ui32GpuStatActiveHigh) / 100);
+	/*There might be a case where util_stats_sample.ui64GpuStatCumulative is actually zero
+	* due to the getutilstats functionality assumes certain conditions in the driver making low
+	* high and blocked values actually 0 */
+	if (util_stats_sample.ui64GpuStatCumulative == 0) {
+		DFRGX_DPF(DFRGX_DEBUG_HIGH, "%s: Ignoring util stats from gpu!\n",
+				__func__);
+		return;
+	}
+
+	/* convert ui64GpuStatActiveHigh time period to a 0.01% precision ratio */
+	active_high *= 10000;
+	do_div(active_high, util_stats_sample.ui64GpuStatCumulative);
+
+	sum_samples_active += (active_high / 100);
 	num_samples++;
 
 	/* When we collect MAX_NUM_SAMPLES samples we need to decide
@@ -398,14 +408,15 @@ static int df_rgx_action(struct df_rgx_data_s *g_dfrgx)
 		return 1;
 
 	if (gpu_rgx_get_util_stats(&util_stats)) {
-		DFRGX_DPF(DFRGX_DEBUG_LOW, "%s: Active: %d, "
-			"Blocked: %d, Idle: %d !\n",
+		DFRGX_DPF(DFRGX_DEBUG_LOW, "%s: Active: %llu, "
+			"Blocked: %llu, Idle: %llu !\n",
 			__func__,
-			util_stats.ui32GpuStatActiveHigh,
-			util_stats.ui32GpuStatBlocked,
-			util_stats.ui32GpuStatIdle);
+			util_stats.ui64GpuStatActiveHigh,
+			util_stats.ui64GpuStatBlocked,
+			util_stats.ui64GpuStatIdle);
 
 		dfrgx_add_sample_data(g_dfrgx, util_stats);
+
 	} else {
 		DFRGX_DPF(DFRGX_DEBUG_MED, "%s: Invalid Util stats !\n",
 		__func__);
