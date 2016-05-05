@@ -489,8 +489,7 @@ config CLEANCACHE
 
 config FRONTSWAP
 	bool "Enable frontswap to cache swap pages if tmem is present"
-	depends on SWAP
-	default n
+	default y
 	help
 	  Frontswap is so named because it can be thought of as the opposite
 	  of a "backing" store for a swap device.  The data is stored into
@@ -504,9 +503,15 @@ config FRONTSWAP
 
 	  If unsure, say Y to enable frontswap.
 
+config SWAP
+	boolean
+	default y
+	help
+	  Enable Swap for caching and paging.
+
 config ZBUD
 	tristate
-	default n
+	default y
 	help
 	  A special purpose allocator for storing compressed pages.
 	  It is designed to store up to two compressed pages per physical
@@ -516,10 +521,9 @@ config ZBUD
 
 config ZSWAP
 	bool "Compressed cache for swap pages (EXPERIMENTAL)"
-	depends on FRONTSWAP && CRYPTO=y
 	select CRYPTO_LZO
 	select ZBUD
-	default n
+	default y
 	help
 	  A lightweight compressed cache for swap pages.  It takes
 	  pages that are in the process of being swapped out and attempts to
@@ -536,7 +540,7 @@ config ZSWAP
 
 config ZPOOL
 	tristate "Common API for compressed memory storage"
-	default n
+	default y
 	help
 	  Compressed memory storage API.  This allows using either zbud or
 	  zsmalloc.
@@ -544,7 +548,7 @@ config ZPOOL
 config ZSMALLOC
 	bool "Memory allocator for compressed pages"
 	depends on MMU
-	default n
+	default y
 	help
 	  zsmalloc is a slab-based memory allocator designed to store
 	  compressed RAM pages.  zsmalloc uses virtual memory mapping
