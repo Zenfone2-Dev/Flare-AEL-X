@@ -143,8 +143,6 @@ static bool tput_latest_performance_mode = false;
 
 inline static void tput_set_performance_mode(bool en)
 {
-	//unsigned long boost_mode;
-
 	//do nothing when tput_check_interval_s=0(disable tput monitor)
 	if(!tput_check_interval_s)
 		return;
@@ -162,11 +160,6 @@ inline static void tput_set_performance_mode(bool en)
 	else
 		pm_qos_update_request(&tput_pm_qos_req, PM_QOS_DEFAULT_VALUE);
 #endif
-/*	if(en)
-		boost_mode = 2;
-	else
-		boost_mode = 0;
-	set_cpufreq_boost(boost_mode);*/
 }
 
 static int tput_monitor_thread(void *num)
@@ -255,11 +248,6 @@ extern bool ap_fw_loaded;
 #endif
 
 #include <wl_android.h>
-
-#include <linux/moduleparam.h>
-
-static int wl_divide = 1;
-module_param(wl_divide, int, 0644);
 
 /* Maximum STA per radio */
 #define DHD_MAX_STA     32
@@ -474,6 +462,8 @@ typedef struct dhd_info {
 	htsf_t  htsf;
 #endif
 	wait_queue_head_t ioctl_resp_wait;
+	wait_queue_head_t d3ack_wait;
+
 	uint32	default_wd_interval;
 
 	struct timer_list timer;
@@ -1494,7 +1484,7 @@ DHD_ERROR(("%s: %d\n", __FUNCTION__, value));
 				dhd->early_suspended = 1;
 #endif
 				/* Kernel suspended */
-				DHD_INFO(("%s: force extra Suspend setting \n", __FUNCTION__));
+				DHD_ERROR(("%s: force extra Suspend setting \n", __FUNCTION__));
 
 #ifndef SUPPORT_PM2_ONLY
 				dhd_wl_ioctl_cmd(dhd, WLC_SET_PM, (char *)&power_mode,
@@ -1537,7 +1527,7 @@ DHD_ERROR(("%s: %d\n", __FUNCTION__, value));
 				dhd->early_suspended = 0;
 #endif
 				/* Kernel resumed  */
-				DHD_INFO(("%s: Remove extra suspend setting \n", __FUNCTION__));
+				DHD_ERROR(("%s: Remove extra suspend setting \n", __FUNCTION__));
 
 #ifndef SUPPORT_PM2_ONLY
 				power_mode = PM_FAST;
@@ -4672,6 +4662,7 @@ dhd_attach(osl_t *osh, struct dhd_bus *bus, uint bus_hdrlen)
 
 	/* Initialize other structure content */
 	init_waitqueue_head(&dhd->ioctl_resp_wait);
+	init_waitqueue_head(&dhd->d3ack_wait);
 	init_waitqueue_head(&dhd->ctrl_wait);
 
 	/* Initialize the spinlocks */
@@ -7237,6 +7228,36 @@ dhd_os_ioctl_resp_wake(dhd_pub_t *pub)
 	return 0;
 }
 
+int
+dhd_os_d3ack_wait(dhd_pub_t *pub, uint *condition, bool *pending)
+{
+	dhd_info_t * dhd = (dhd_info_t *)(pub->info);
+	int timeout;
+
+	/* Convert timeout in millsecond to jiffies */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 27))
+	timeout = msecs_to_jiffies(dhd_ioctl_timeout_msec);
+#else
+	timeout = dhd_ioctl_timeout_msec * HZ / 1000;
+#endif
+
+	DHD_PERIM_UNLOCK(pub);
+	timeout = wait_event_timeout(dhd->d3ack_wait, (*condition), timeout);
+	DHD_PERIM_LOCK(pub);
+
+	return timeout;
+}
+
+int
+dhd_os_d3ack_wake(dhd_pub_t *pub)
+{
+	dhd_info_t *dhd = (dhd_info_t *)(pub->info);
+
+	wake_up(&dhd->d3ack_wait);
+	return 0;
+}
+
+
 void
 dhd_os_wd_timer_extend(void *bus, bool extend)
 {
@@ -8273,10 +8294,10 @@ int dhd_os_wake_lock_timeout(dhd_pub_t *pub)
 #ifdef CONFIG_HAS_WAKELOCK
 		if (dhd->wakelock_rx_timeout_enable)
 			wake_lock_timeout(&dhd->wl_rxwake,
-				msecs_to_jiffies(dhd->wakelock_rx_timeout_enable)/wl_divide);
+				msecs_to_jiffies(dhd->wakelock_rx_timeout_enable));
 		if (dhd->wakelock_ctrl_timeout_enable)
 			wake_lock_timeout(&dhd->wl_ctrlwake,
-				msecs_to_jiffies(dhd->wakelock_ctrl_timeout_enable)/wl_divide);
+				msecs_to_jiffies(dhd->wakelock_ctrl_timeout_enable));
 #endif
 		dhd->wakelock_rx_timeout_enable = 0;
 		dhd->wakelock_ctrl_timeout_enable = 0;
