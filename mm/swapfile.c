@@ -675,6 +675,7 @@ int page_swapcount(struct page *page)
  * How many references to @entry are currently swapped out?
  * This considers COUNT_CONTINUED so it returns exact answer.
  */
+
 int swp_swapcount(swp_entry_t entry)
 {
 	int count, tmp_count, n;
