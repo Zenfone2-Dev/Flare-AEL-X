@@ -41,7 +41,7 @@
 #include <asm/tlbflush.h>
 #include "internal.h"
 
-/* Boolean to indicate whether to use deferred timer or not */
+
 static bool use_deferred_timer = 1;
 
 #ifdef CONFIG_NUMA
