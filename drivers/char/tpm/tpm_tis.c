@@ -373,7 +373,6 @@ out_err:
 	return rc;
 }
 
-<<<<<<< HEAD
 static int tpm_tis_send(struct tpm_chip *chip, u8 *buf, size_t len)
 {
 	int rc, irq;
