@@ -9,6 +9,10 @@ echo "Current Date : $NOW"
 echo "Applying Build Settings"
 sleep 1
 
+export ARCH=x86_64
+export CCOMPILE=$CROSS_COMPILE
+export CROSS_COMPILE=x86_64-linux-
+
 #CONFIGS
 echo "Setting CPU Cores/Threads"
 export CPUS=`nproc`
